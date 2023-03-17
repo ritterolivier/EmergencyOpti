@@ -8,8 +8,8 @@ class Matrix:
         df_ville = villages.get_df()
         df_centre = centres.get_df()
 
-        df_ville = df_ville.astype({'Latitude': 'int32', 'Longitude': 'int32'})
-        df_centre = df_centre.astype({'Latitude': 'int32', 'Longitude': 'int32'})
+        df_ville = df_ville.astype({'Latitude': 'float', 'Longitude': 'float'})
+        df_centre = df_centre.astype({'Latitude': 'float', 'Longitude': 'float'})
 
         self._rows = len(df_ville.index)
         self._cols = len(df_centre.index)
