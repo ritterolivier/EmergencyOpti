@@ -25,7 +25,13 @@ class Solution:
         return(cmax)
 
     def test(self, ptimesscen, type_solver):
-        """ Plot the performances of a given mathematical formulation against randomly generated scenrios."""
+        """
+        Plot the performances of a given mathematical formulation against randomly generated scenarios.
+
+        Parameters:
+        - ptimesscen: matrix of processing times for each job on each machine for multiple scenarios
+        - type_solver: string representing the type of mathematical formulation to be tested
+        """
         nbscenarios = ptimesscen.shape[0]
         results = np.zeros(nbscenarios)
         for s in range(nbscenarios):
