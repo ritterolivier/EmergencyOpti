@@ -8,7 +8,7 @@ if __name__ == '__main__':
     print("------------ Welcome to the job-shop solver ----------------")
 
     # Step 1: Create an instance from the datafile
-    filename = "/Users/d0li/Nextcloud/IMT/Semestre 4/Optimisation dans l'incertain/dataJS.xlsx"
+    filename = "data_drones.xlsx"
     instance = JSInstance(filename)
     # If necessary, print the information stored in the instance
     instance.print()
