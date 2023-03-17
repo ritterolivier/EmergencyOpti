@@ -10,5 +10,8 @@ villages = JSInstance("data_drones.xlsx", "Demand points")
 centres = JSInstance("data_drones.xlsx", "Help centers")
 
 matrix = Matrix(villages, centres); 
-print(matrix.get_matrix()); 
-print(villages.get_df())
+
+for row in matrix.get_matrix():
+    print(row, "\n")
+    print("\n")
+

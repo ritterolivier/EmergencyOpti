@@ -5,14 +5,32 @@ import math
 
 class Matrix:
     def __init__(self, villages : JSInstance, centres : JSInstance):
-        self._rows = len(villages. index)
-        self._cols = len(centres. index)
-        self._matrix = [[0 for _ in range(len(villages. index))] for _ in range(len(centres. index))]
-        
-        self.fillMatrix(villages, centres)
+        df_ville = villages.get_df()
+        df_centre = centres.get_df()
+
+        df_ville = df_ville.astype({'Latitude': 'int32', 'Longitude': 'int32'})
+        df_centre = df_centre.astype({'Latitude': 'int32', 'Longitude': 'int32'})
+
+        self._rows = len(df_ville.index)
+        self._cols = len(df_centre.index)
+
+        self._matrix = [[0 for _ in range(self._cols)] for _ in range(self._rows)]
+
+        for index, row in df_ville.iterrows():
+            for index2, row2 in df_centre.iterrows():
+                value = math.sqrt(
+                    math.pow(
+                    (row["Latitude"] - row2["Latitude"]) , 2
+                    )
+                    +
+                    math.pow(
+                    (row["Longitude"] - row2["Longitude"]) , 2
+                    )
+                    )
+                print(value)
+                self.set_value(index-1, index2-1, value)
 
 
-    
 
     def __str__(self):
         matrix_str = ""
@@ -31,24 +49,3 @@ class Matrix:
     def get_matrix(self):
         return self._matrix
     
-
-    def fillMatrix(self, villages : JSInstance, centres : JSInstance):
-        df_ville = villages.get_df()
-        df_centre = centres.get_df()
-
-        i = 0
-        for row in df_ville.iterrows():
-            j = 0
-            for row2 in df_centre.iterrow():
-                value = math.sqrt(
-                    math.pow(
-                    (row["Latitude"] - row2["Latitude"]) , 2
-                    )
-                    +
-                    math.pow(
-                    (row["Longitude"] - row2["Longitude"]) , 2
-                    )
-                    )
-                self.set_value(i, j, value)
-                j+=1
-            i+=1
