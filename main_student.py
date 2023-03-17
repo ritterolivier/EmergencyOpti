@@ -57,4 +57,10 @@ if __name__ == '__main__':
     #stochsolution.test(ptscenarios, ...)
     #robsolution.test(ptscenarios, ...)
 
-    #Test commit Modi
+
+#First, it imports the necessary packages and classes.
+#Then, it defines a main() function that will execute the entire script.
+#Inside the main() function, it prints a welcome message to the console.
+#It creates an instance of the job-shop problem from an Excel file, which contains the data for the problem.
+#It creates a deterministic mathematical program from the instance and solves it using a MILP solver.
+#It creates stochastic and robust mathematical programs, but these are commented out and not
