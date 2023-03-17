@@ -11,7 +11,10 @@ centres = JSInstance("data_drones.xlsx", "Help centers")
 
 matrix = Matrix(villages, centres); 
 
+
 for row in matrix.get_matrix():
     print(row, "\n")
     print("\n")
 
+print(len(matrix.get_matrix()))
+print(len(matrix.get_matrix()[0]))
