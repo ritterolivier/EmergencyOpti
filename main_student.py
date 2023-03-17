@@ -9,7 +9,8 @@ if __name__ == '__main__':
 
     # Step 1: Create an instance from the datafile
     filename = "data_drones.xlsx"
-    instance = JSInstance(filename)
+    sheetname = 'Demand points'
+    instance = JSInstance(filename, sheetname)
     # If necessary, print the information stored in the instance
     instance.print()
 
