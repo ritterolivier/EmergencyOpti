@@ -25,5 +25,8 @@ class Matrix:
     
 
     def fillMatrix(self, villages : JSInstance, centres : JSInstance):
-        for index, row in villages.
+        df_ville = villages.get_df()
+        df_centre = villages.get_df()
+        for index, row in df_ville.iterrows():
+            pass
         pass
