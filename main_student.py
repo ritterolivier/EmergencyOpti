@@ -56,3 +56,5 @@ if __name__ == '__main__':
     detsolution.test(ptscenarios, "Deterministic")
     #stochsolution.test(ptscenarios, ...)
     #robsolution.test(ptscenarios, ...)
+
+    #Test commit Modi
