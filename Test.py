@@ -4,6 +4,7 @@ import pandas as pd
 from Matrix import Matrix
 from Villages import Villages
 from Centres import Centres
+from DeterministicSolver2 import DeterministicSolver2
 
 """# Import custom modules
 from JSInstance import JSInstance
@@ -21,6 +22,8 @@ for row in matrix.get_matrix():
 print(len(matrix.get_matrix()))
 print(len(matrix.get_matrix()[0]))
 """
+
+
 if __name__ == "__main__":
     centres = Centres()
 
@@ -73,3 +76,18 @@ if __name__ == "__main__":
         print("All distances between centers and villages are the same.")
     else:
         print("Not all distances between centers and villages are the same.")
+
+
+    print(centres.get_distance_from_village(1,1))
+
+    # Create and solve the problem with the deterministic method
+    detsolver = DeterministicSolver2(centres, villages)
+    detsolver.create_model()
+    detsolver.solve_milp()
+
+    # Get the solution
+    solution = detsolver.get_solution()
+
+    # Print the solution
+    solution.print()
+

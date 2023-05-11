@@ -37,6 +37,9 @@ class Centres(JSInstance):
 
         self.village_distance_dict = center_village_distance_dict
 
+    def get_distance_from_village(self, center_key, village_key):
+        return self.village_distance_dict[center_key][village_key]
+
 
 if __name__ == "__main__":
     centre = Centres()

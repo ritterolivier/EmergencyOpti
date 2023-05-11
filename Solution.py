@@ -5,25 +5,21 @@ from JSInstance import JSInstance
 
 class Solution:
     # constructor
-    def __init__(self, instance=None, cmax=None, alloc=None):
-        self._instance = instance
-        self._makespan = cmax
+    def __init__(self, max_demand=None, alloc=None, drone_comsumption=None):
+        self._max_demand = max_demand
         self._alloc = alloc
+        self._drone_consumption = {}
+        
 
     def print(self):
-        print("Makespan: {}".format(self._makespan))
-        print("Job allocation:")
-        for j in self._alloc.columns:
-            print("Machine {}: {}".format(j, self._alloc.index[self._alloc[j]==1].tolist()))
-
-    def compute_makespan(self, ptimes):
-        """Compute the realized makespan for a given matrix of processing times."""
-        cmax = 0
-        for j in self._instance._processtimes.columns:
-            cmax = max(cmax, np.dot(ptimes[:,j-1], self._alloc[j]))
-
-        return(cmax)
-
+        print("Max demand: {}".format(self._max_demand))
+        print("Drone allocation:")
+        for i, j, k in self._alloc:
+            if self._alloc[(i, j, k)]:
+                print(f"Drone {k} from center {i} to village {j}")
+        for drone, consumption in self._drone_consumption.items():
+            print(f"Drone {drone}: {consumption:.2f} Wh")
+    
     def test(self, ptimesscen, type_solver):
         """
         Plot the performances of a given mathematical formulation against randomly generated scenarios.
