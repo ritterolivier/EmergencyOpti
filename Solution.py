@@ -5,10 +5,11 @@ from JSInstance import JSInstance
 
 class Solution:
     # constructor
-    def __init__(self, max_demand=None, alloc=None, drone_comsumption=None):
+    def __init__(self, max_demand=None, alloc=None, drone_comsumption=None, open=None ):
         self._max_demand = max_demand
         self._alloc = alloc
         self._drone_consumption = {}
+        self._open = open
         
 
     def print(self):
@@ -17,6 +18,10 @@ class Solution:
         for i, j, k in self._alloc:
             if self._alloc[(i, j, k)]:
                 print(f"Drone {k} from center {i} to village {j}")
+        print("Open centers:")
+        for i in self._open:
+            if self._alloc[(i)]:
+                print(f"Center {i} is opened.")
         for drone, consumption in self._drone_consumption.items():
             print(f"Drone {drone}: {consumption:.2f} Wh")
     
