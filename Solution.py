@@ -61,8 +61,12 @@ class Solution:
 
         for drone in drone_dict:
             print(f"Drone {drone} serves:")
+            total_consumption = 0
             for village, center in drone_dict[drone]:
-                print(f"\tVillage {village} from center {center} with consumption {self._drone_consumption[(center, village, drone)]:.2f} Wh")
+                consumption = self._drone_consumption[(center, village, drone)]
+                print(f"\tVillage {village} from center {center} with consumption {consumption:.2f} Wh")
+                total_consumption += consumption  # Add the consumption of this trip to the total
+            print(f"Total consumption for drone {drone}: {total_consumption:.2f} Wh")
 
         # Check for multiple drones serving the same village
         for village, drones in supplied_villages.items():
