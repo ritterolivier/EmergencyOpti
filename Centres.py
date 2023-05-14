@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from JSInstance import JSInstance
+import math
+from scipy.spatial import distance
 
 class Centres(JSInstance):
     def __init__(self, datafile="data_drones.xlsx", sheetname="Help centers"):
@@ -21,10 +23,18 @@ class Centres(JSInstance):
     def get_localisation_dict(self):
         return self._localisation_dict
     
+    
     def euclidean_distance(self, point1, point2):
         lat1, lon1 = point1
         lat2, lon2 = point2
         return np.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2)
+    
+    def haversine_distance(self, point1, point2):
+        lat1, lon1 = point1
+        lat2, lon2 = point2
+        # Convert latitude and longitude from degrees to radians
+        lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+        return math.acos(math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(lon2 - lon1)) * 6371
     
     def create_village_distance_dict(self, village_obj):
         village_localisation_dict = village_obj.get_localisation_dict()
@@ -33,7 +43,9 @@ class Centres(JSInstance):
         for center_id, center_loc in self._localisation_dict.items():
             center_village_distance_dict[center_id] = {}
             for village_id, village_loc in village_localisation_dict.items():
-                center_village_distance_dict[center_id][village_id] = self.euclidean_distance(center_loc, village_loc)
+                center_village_distance_dict[center_id][village_id] = self.haversine_distance(center_loc, village_loc)
+                #math.dist(center_loc, village_loc)
+                #self.euclidean_distance(center_loc, village_loc)
 
         self.village_distance_dict = center_village_distance_dict
 

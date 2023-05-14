@@ -6,6 +6,7 @@ from Villages import Villages
 from Centres import Centres
 from DeterministicSolver2 import DeterministicSolver2
 
+
 """# Import custom modules
 from JSInstance import JSInstance
 
@@ -90,4 +91,6 @@ if __name__ == "__main__":
 
     # Print the solution
     solution.print()
+
+  
 
