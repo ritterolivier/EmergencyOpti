@@ -21,8 +21,6 @@ class DeterministicSolver2(object):
         # Cunsomption constat
         self.beta = 2.3
 
-        print(self.drone)
-
     # Method for creating the model
     def create_model(self):
         # Define decision variables, objective function, and constraints
@@ -149,6 +147,5 @@ class DeterministicSolver2(object):
             for i, j, k in sol._alloc:
                 if sol._alloc[(i, j, k)]:
                     sol._supplied[j] = True
-                    sol._drone_consumption[(i, j, k)] = 2 * 1.1 * (self.beta * self.center.get_distance_from_village(i,j)) * \
-                                                    (self.village.get_demand(j) + 10) * sol._alloc[(i, j, k)]
+                    sol._drone_consumption[(i, j, k)] = 2 * 1.1 * self.beta * self.center.get_distance_from_village(i,j) * (self.village.get_demand(j) + 10) * sol._alloc[(i, j, k)]
         return sol
