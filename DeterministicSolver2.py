@@ -74,15 +74,17 @@ class DeterministicSolver2(object):
         for j in self.village.get_all_ids():
             self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= 1
 
-        #30kg max / drone
-        for k in self.drone:
-            self._model += pulp.lpSum(self._x[i,j,k] * self.village.get_demand(j) for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 30
+        # 30kg max / center
+        for i in self.center.get_all_ids():
+            self._model += pulp.lpSum(self._x[i,j,k] * self.village.get_demand(j) for j in self.village.get_all_ids() for k in self.drone) <= 30
+
 
         # 1 road center - villlage by drone
         #for k in self.drone:
         #    self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 1
 
-    
+        # Limit the max demand met to 5 * 30 = 150
+        self._model += pulp.lpSum(self._x[i, j, k] * self.village.get_demand(j) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone) <= 150
 
         # 5 opened center max
         self._model += pulp.lpSum(self._y[i] for i in self.center.get_all_ids()) <= 5
