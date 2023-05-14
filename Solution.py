@@ -11,33 +11,15 @@ class Solution:
         self._drone_consumption = drone_comsumption if drone_comsumption else {}
         self._open = open if open else {}
         self._supplied = {}
-        self._center_demand = {}  # New attribute to store total demand for each center
+        self._center_demand = {} 
         self.center = center
         self.village = village
 
     def print(self):
         print(f"Max demand: {self._max_demand:.2f}")
-        print("Opened centers:")
-        for center in self.center.get_all_ids():
-            if center in self._open:
-                print(center, end=', ')
-        print("\n")
-        print("Unopened centers:")
-        for center in self.center.get_all_ids():
-            if center not in self._open:
-                print(center, end=', ')
-        print("\n")
-        print("Supplied villages:")
-        for village in self.village.get_all_ids():
-            if village in self._supplied:
-                print(village, end=', ')
-        print("\n")
-        print("Unsupplied villages:")
-        for village in self.village.get_all_ids():
-            if village not in self._supplied:
-                print(village, end=', ')
-        print("\n")
+
         drone_dict = {}
+        supplied_villages = {} # Added line
         for i, j, k in self._alloc:
             if self._alloc[(i, j, k)]:
                 if k in drone_dict:
@@ -47,10 +29,48 @@ class Solution:
                 self._supplied[j] = True
                 # add demand of village to corresponding center
                 self._center_demand[i] = self._center_demand.get(i, 0) + self.village.get_demand(j)
+                # Add village to supplied_villages
+                if j in supplied_villages:
+                    supplied_villages[j].append(k)
+                else:
+                    supplied_villages[j] = [k]
+
+        print("Opened centers:")
+        for center in self.center.get_all_ids():
+            if center in self._open:
+                print(center, end=', ')
+        print("\n")
+
+        print("Unopened centers:")
+        for center in self.center.get_all_ids():
+            if center not in self._open:
+                print(center, end=', ')
+        print("\n")
+
+        print("Supplied villages:")
+        for village in self.village.get_all_ids():
+            if self._supplied[village]:
+                print(village, end=', ')
+        print("\n")
+
+        print("Unsupplied villages:")
+        for village in self.village.get_all_ids():
+            if not self._supplied[village]:
+                print(village, end=', ')
+        print("\n")
+
         for drone in drone_dict:
             print(f"Drone {drone} serves:")
             for village, center in drone_dict[drone]:
                 print(f"\tVillage {village} from center {center} with consumption {self._drone_consumption[(center, village, drone)]:.2f} Wh")
+
+        # Check for multiple drones serving the same village
+        for village, drones in supplied_villages.items():
+            if len(drones) > 1:
+                print(f"Warning: Village {village} is supplied by multiple drones: {', '.join(map(str, drones))}")
+            else : 
+                print(f"Village {village} is not supplied by multiple drones: {', '.join(map(str, drones))}")
+
         # print total demand for each center
         print("Total demand for each center:")
         for center, demand in self._center_demand.items():
