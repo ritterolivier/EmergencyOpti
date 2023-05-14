@@ -34,7 +34,7 @@ if __name__ == "__main__":
     centres.create_village_distance_dict(villages)
     villages.create_center_distance_dict(centres)
 
-    # Print the nested dictionary of distances from each center to each village
+    '''# Print the nested dictionary of distances from each center to each village
     print("Center to Village distances:")
     for center_id, distances in centres.village_distance_dict.items():
         print(f"Center {center_id}:")
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         print("Not all distances between centers and villages are the same.")
 
 
-    print(centres.get_distance_from_village(1,1))
+    print(centres.get_distance_from_village(1,1))'''
 
     # Create and solve the problem with the deterministic method
     detsolver = DeterministicSolver2(centres, villages)

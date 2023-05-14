@@ -21,6 +21,8 @@ class DeterministicSolver2(object):
         # Cunsomption constat
         self.beta = 2.3
 
+        print(self.drone)
+
     # Method for creating the model
     def create_model(self):
         # Define decision variables, objective function, and constraints
@@ -34,7 +36,7 @@ class DeterministicSolver2(object):
         Create the decision variables used in the model.
         """
         # Binary variables x_ijk to define if center i serve j village with k drone
-        self._x = pulp.LpVariable.dicts('Center - Drone - Village allocation', 
+        self._x = pulp.LpVariable.dicts('Drone allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
                                         cat=pulp.LpBinary)
         # Binary variables y_i to define if i center is open
@@ -42,10 +44,10 @@ class DeterministicSolver2(object):
                                   self.center.get_all_ids(),
                                   cat=pulp.LpBinary)
         
-        self._z = pulp.LpVariable.dicts('Center - Drone allocation', 
-                                        ((i, k) for i in self.center.get_all_ids() for k in self.drone),
+        self._z = pulp.LpVariable.dicts('Center - Drone Allocation',
+                                   ((i, k) for i in self.center.get_all_ids() for k in self.drone),
                                         cat=pulp.LpBinary)
-
+        
 
     # Method for creating the objective function
     def create_objective(self):
@@ -67,39 +69,45 @@ class DeterministicSolver2(object):
                                                 (self.village.get_demand(j) + 10) *
                                                  self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
 
-        #30kg max / centre
-        for i in self.center.get_all_ids():
-            self._model += pulp.lpSum(self._x[i,j,k] * self.village.get_demand(j) for j in self.village.get_all_ids() for k in self.drone) <= 30
-        
+
         # 1 drone per village
         for j in self.village.get_all_ids():
             self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= 1
 
+        #30kg max / drone
+        for k in self.drone:
+            self._model += pulp.lpSum(self._x[i,j,k] * self.village.get_demand(j) for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 30
+
+        # 1 road center - villlage by drone
+        #for k in self.drone:
+        #    self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 1
+
+    
+
         # 5 opened center max
         self._model += pulp.lpSum(self._y[i] for i in self.center.get_all_ids()) <= 5
 
-        # Drone can be assigned to only one center
-        for k in self.drone:
-            self._model += pulp.lpSum(self._z[i, k] for i in self.center.get_all_ids()) <= 1
+        # # If center is not open, no drone can use it as its origin : USELESS in that model
+        # for i in self.center.get_all_ids():
+        #     for j in self.village.get_all_ids():
+        #         for k in self.drone:
+        #             self._model += self._y[i] >= self._x[i,j,k]
 
-        # If a drone doesn't use a center as origin, it cannot make the i -> j trip
-        """for i in self.center.get_all_ids():
-            for j in self.village.get_all_ids():
-                for k in self.drone:
-                   self._model += self._z[i,k] >= self._x[i,j,k]"""
-
-
-
-        # If a center isn't opened, no drone can use it as its origin
-        #for i in self.center.get_all_ids():
-            #for k in self.drone:
-                #self._model += self._y[i] >= self._z[i,k]
-
-        '''# If center is not open, no drone can use it as its origin
+        # If drone not assigned to center, impossible to go to a village
         for i in self.center.get_all_ids():
             for j in self.village.get_all_ids():
                 for k in self.drone:
-                    self._model += self._y[i] >= self._x[i,j,k]'''
+                    self._model += self._z[i,k] >= self._x[i,j,k]
+
+        # If center not opened, no drone assigned
+        for i in self.center.get_all_ids():
+                for k in self.drone:
+                    self._model += self._y[i] >= self._z[i,k]
+
+        # 1 drone est assigné à un unique centre
+        for k in self.drone : 
+            self._model += pulp.lpSum(self._z[i,k] for i in self.center.get_all_ids()) <= 1
+
 
     # Method for writing the MILP model to a file
     def write_milp(self):
@@ -125,19 +133,20 @@ class DeterministicSolver2(object):
         #self._model.solve(pulp.CPLEX_CMD())
         #self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.005))
 
+
     def get_solution(self):
         """
         Create a solution object from the decision variables computed.
         """
-        sol = Solution()
+        sol = Solution(self.center, self.village)
         if self._model.status > 0:
             sol._max_demand = pulp.value(self._model.objective)
             sol._alloc = {key: var.varValue for key, var in self._x.items() if var.varValue > 0}
             sol._open = {key: var.varValue for key, var in self._y.items() if var.varValue > 0}
-            for k in self.drone:
-                sol._drone_consumption[k] = 2 * 1.1 * sum((self.beta * self.center.get_distance_from_village(i, j)) * 
-                                                        (self.village.get_demand(j) + 10) *
-                                                        var.varValue for ((i, j, k_drone), var) in self._x.items() 
-                                                        if var.varValue > 0 and k_drone == k)
-        return sol 
-
+            sol._supplied = {key: False for key in self.village.get_all_ids()}
+            for i, j, k in sol._alloc:
+                if sol._alloc[(i, j, k)]:
+                    sol._supplied[j] = True
+                    sol._drone_consumption[(i, j, k)] = 2 * 1.1 * (self.beta * self.center.get_distance_from_village(i,j)) * \
+                                                    (self.village.get_demand(j) + 10) * sol._alloc[(i, j, k)]
+        return sol
