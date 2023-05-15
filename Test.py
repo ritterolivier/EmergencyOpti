@@ -5,7 +5,9 @@ from Matrix import Matrix
 from Villages import Villages
 from Centres import Centres
 from DeterministicSolver2 import DeterministicSolver2
-
+from Stochastic import Stochastic
+import random
+from tqdm import tqdm
 
 """# Import custom modules
 from JSInstance import JSInstance
@@ -87,10 +89,39 @@ if __name__ == "__main__":
     detsolver.solve_milp()
 
     # Get the solution
-    solution = detsolver.get_solution()
+    detsol = detsolver.get_solution()
 
     # Print the solution
-    solution.print()
+    detsol.print()
+
+    print(detsol.get_drone_center())
+    print(detsol.get_open())
+
+
+    # Create and solve the problem with the deterministic method
+    stochDic = {}
+
+    for i in tqdm(range(0,100)):
+        beta = random.uniform(2.5,3)
+        stochsolver = Stochastic(centres, villages, detsolver, beta)
+        stochsolver.create_model()
+        stochsolver.solve_milp()
+
+        # Get the solution
+        stochsol = stochsolver.get_solution()
+
+        # Print the solution
+        stochsol.print()
+
+        stochDic[i] = [stochsol, beta]
+
+        with open('stochresult.txt', 'a') as f:
+            f.write(f'Iteration: {i}\n')
+            f.write(f'Beta value: {beta}\n')
+            f.write('Solution:\n')
+            f.write(str(stochsol))  # Write the solution. The solution class should have an appropriate __str__ method.
+            f.write('\n')
+
 
   
 
