@@ -8,7 +8,7 @@ from JSInstance import JSInstance
 from Solution import Solution
 
 # Class for solving deterministic job-shop scheduling problems using MILP
-class DeterministicSolver2(object):
+class Deterministic(object):
     def __init__(self, centers, villages):
         # Initialize MILP model and instance
         self._model = pulp.LpProblem("Drone attribution", pulp.LpMaximize)

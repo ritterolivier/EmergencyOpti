@@ -59,11 +59,11 @@ class Solution:
                 print(center, end=', ')
         print("\n")
 
-        print("Unopened centers:")
+        '''print("Closed centers:")
         for center in self.center.get_all_ids():
             if center not in self._opened_centers:  # if center is not in opened_centers dictionary, it is not open
                 print(center, end=', ')
-        print("\n")
+        print("\n")'''
 
         print("Supplied villages:")
         for village in self.village.get_all_ids():
@@ -71,11 +71,11 @@ class Solution:
                 print(village, end=', ')
         print("\n")
 
-        print("Unsupplied villages:")
+        '''print("Unsupplied villages:")
         for village in self.village.get_all_ids():
             if not self._supplied[village]:
                 print(village, end=', ')
-        print("\n")
+        print("\n")'''
 
         for drone in drone_dict:
             print(f"Drone {drone} serves:")
@@ -86,17 +86,18 @@ class Solution:
                 total_consumption += consumption  # Add the consumption of this trip to the total
             print(f"Total consumption for drone {drone}: {total_consumption:.2f} Wh")
 
-        # Check for multiple drones serving the same village
+        '''# Check for multiple drones serving the same village
         for village, drones in supplied_villages.items():
             if len(drones) > 1:
                 print(f"Warning: Village {village} is supplied by multiple drones: {', '.join(map(str, drones))}")
             else : 
-                print(f"Village {village} is not supplied by multiple drones: {', '.join(map(str, drones))}")
+                print(f"Village {village} is not supplied by multiple drones: {', '.join(map(str, drones))}")'''
 
         print("Total demand and drones for each center:")
         for center, demand in self._center_demand.items():
-            drone = self._drone_center.get(center, "No drone assigned")
-            print(f"\tCenter {center}: {demand:.2f}, Drone: {drone}")
+            drones = [v for (c, v), drone in self._drone_center.items() if c == center and drone == 1.0]
+            drones_str = ', '.join(map(str, drones)) if drones else "No drone assigned"
+            print(f"\tCenter {center}: {demand:.2f}, Drone: {drones_str}")
     
     def test(self, ptimesscen, type_solver):
         """
@@ -133,12 +134,12 @@ class Solution:
                 solution_str += f"{center}, "
         solution_str += "\n"
 
-        # Add the unopened centers
-        solution_str += "Unopened centers:\n"
+        '''# Add the closed centers
+        solution_str += "Closed centers:\n"
         for center in self.center.get_all_ids():
             if center not in self._opened_centers:
                 solution_str += f"{center}, "
-        solution_str += "\n"
+        solution_str += "\n"'''
 
         # Add the supplied villages
         solution_str += "Supplied villages:\n"
@@ -147,12 +148,12 @@ class Solution:
                 solution_str += f"{village}, "
         solution_str += "\n"
 
-        # Add the unsupplied villages
+        '''# Add the unsupplied villages
         solution_str += "Unsupplied villages:\n"
         for village in self.village.get_all_ids():
             if not self._supplied[village]:
                 solution_str += f"{village}, "
-        solution_str += "\n"
+        solution_str += "\n"'''
 
         # Add the drone information
         drone_dict = {}
@@ -180,17 +181,20 @@ class Solution:
                 total_consumption += consumption
             solution_str += f"Total consumption for drone {drone}: {total_consumption:.2f} Wh\n"
 
-        # Check for multiple drones serving the same village
+        '''# Check for multiple drones serving the same village
         for village, drones in supplied_villages.items():
             if len(drones) > 1:
                 solution_str += f"Warning: Village {village} is supplied by multiple drones: {', '.join(map(str, drones))}\n"
             else:
-                solution_str += f"Village {village} is not supplied by multiple drones: {', '.join(map(str, drones))}\n"
+                solution_str += f"Village {village} is not supplied by multiple drones: {', '.join(map(str, drones))}\n"'''
 
         solution_str += "Total demand and drones for each center:\n"
         for center, demand in self._center_demand.items():
-            drone = self._drone_center.get(center, "No drone assigned")
-            solution_str += f"\tCenter {center}: {demand:.2f}, Drone: {drone}\n"
+            drones = [v for (c, v), drone in self._drone_center.items() if c == center and drone == 1.0]
+            drones_str = ', '.join(map(str, drones)) if drones else "No drone assigned"
+            solution_str += f"\tCenter {center}: {demand:.2f}, Drones: {drones_str}\n"
+
+
 
 
         # Return the formatted solution string
