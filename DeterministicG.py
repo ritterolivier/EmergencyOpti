@@ -19,7 +19,7 @@ class DeterministicG(object):
         # Get list of drones
         self.drone = np.arange(1,31)
         # Cunsomption constats
-        self.beta = 2.3
+        self.beta = 2.75
 
     # Method for creating the model
     def create_model(self):
@@ -33,18 +33,24 @@ class DeterministicG(object):
         """
         Create the decision variables used in the model.
         """
-        # Binary variables x_ijk to define if center i serve j village with k drone
-        self._x = pulp.LpVariable.dicts('Drone allocation', 
+        # weight x_ijk to define if center i serve j village with k drone
+        self._x = pulp.LpVariable.dicts('Weight allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpContinuous)
+                                        lowBound=0,cat=pulp.LpInteger)
+        
+        # Binary variables x_ijk to define if center i serve j village with k drone
+        self._t = pulp.LpVariable.dicts('Drone allocation', 
+                                        ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
+                                        lowBound=0,cat=pulp.LpBinary)
+        
         # Binary variables y_i to define if i center is open
         self._y = pulp.LpVariable.dicts('Center opening',
                                   self.center.get_all_ids(),
-                                  lowBound=0,cat=pulp.LpBinary)
+                                  cat=pulp.LpBinary)
         
         self._z = pulp.LpVariable.dicts('Center - Drone Allocation',
                                    ((i, k) for i in self.center.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpBinary)
+                                        cat=pulp.LpBinary)
         
 
     # Method for creating the objective function
@@ -61,52 +67,49 @@ class DeterministicG(object):
         """
         Create the model constraints.
         """
-        # 700Wh max / drone
+        #1. 700Wh max / drone
         for k in self.drone:
-            self._model +=  1.1 * pulp.lpSum((self.beta * self.center.get_distance_from_village(i,j)) * 
-                                                (self._x[i,j,k] + 20) 
-                                                  for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
+            self._model +=  1.1 * pulp.lpSum(self.beta * self.center.get_distance_from_village(i,j) * 
+                                            (self._x[i,j,k]  + 20*self._t[i, j, k]) 
+                                            for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
 
 
-        # 1 drone per village
+        #2. At most satisfy the demand
         for j in self.village.get_all_ids():
-            self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= self.village.get_demand(j)
+            self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= self.village.get_demand(j) #*bin_trajet8drone
 
-        # 30kg max / center
+        #3. 30kg max / center
         for i in self.center.get_all_ids():
             self._model += pulp.lpSum(self._x[i,j,k] for j in self.village.get_all_ids() for k in self.drone) <= 30
 
 
-        # 1 road center - villlage by drone
-        #for k in self.drone:
-        #    self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 1
-
-        # Limit the max demand met to 5 * 30 = 150
-        #self._model += pulp.lpSum(self._x[i, j, k] * self.village.get_demand(j) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone) <= 150
-
-        # 5 opened center max
+        #4. 5 opened center max
         self._model += pulp.lpSum(self._y[i] for i in self.center.get_all_ids()) <= 5
 
-        # # If center is not open, no drone can use it as its origin : USELESS in that model
-        # for i in self.center.get_all_ids():
-        #     for j in self.village.get_all_ids():
-        #         for k in self.drone:
-        #             self._model += self._y[i] >= self._x[i,j,k]
-
-        # If drone not assigned to center, impossible to go to a village
-        for i in self.center.get_all_ids():
-            for j in self.village.get_all_ids():
-                for k in self.drone:
-                    self._model += self._x[i,j,k] <= self.village.get_demand(j)*self._z[i,k]
-
-        # If center not opened, no drone assigned
+        #5. 1 drone est assigné à un unique centre
+        for k in self.drone : 
+            self._model += pulp.lpSum(self._z[i,k] for i in self.center.get_all_ids()) <= 1
+  
+        #6. If center not opened, no drone assigned
         for i in self.center.get_all_ids():
                 for k in self.drone:
                     self._model += self._y[i] >= self._z[i,k]
+        
+        #7.If drone is not assigned to village from a center, demand associated is null
+        for i in self.center.get_all_ids():
+            for j in self.village.get_all_ids():
+                for k in self.drone:
+                    self._model += self._x[i,j,k] <= self._t[i,j,k]*self.village.get_demand(j)
 
-        # 1 drone est assigné à un unique centre
-        for k in self.drone : 
-            self._model += pulp.lpSum(self._z[i,k] for i in self.center.get_all_ids()) <= 1
+      
+
+        #8. If drone not assigned to center, impossible to go to a village
+        for i in self.center.get_all_ids():
+            for j in self.village.get_all_ids():
+                for k in self.drone:
+                    self._model += self._z[i,k] >= self._t[i,j,k]
+
+        
 
 
     # Method for writing the MILP model to a file
@@ -130,14 +133,14 @@ class DeterministicG(object):
         #self._model.solve(pulp.GUROBI_CMD(options=[("MIPgap", 0.03)]))
         #self._model.solve(pulp.GUROBI(msg=1, gapRel=0.001))
 
-        self._model.solve(pulp.CPLEX_CMD())
-        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.005))
-
+        #self._model.solve(pulp.CPLEX_CMD())
+        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.04))
 
     def get_solution(self):
         """
         Create a solution object from the decision variables computed.
         """
+        print("Max demande : ")
         print(pulp.value(self._model.objective))
         sol = Solution(self.center, self.village)
         if self._model.status > 0:
@@ -149,5 +152,5 @@ class DeterministicG(object):
             for i, j, k in sol._alloc:
                 if sol._alloc[(i, j, k)]:
                     sol._supplied[j] = True
-                    sol._drone_consumption[(i, j, k)] = 2 * 1.1 * self.beta * self.center.get_distance_from_village(i,j) * (self.village.get_demand(j) + 10) * sol._alloc[(i, j, k)]
+                    sol._drone_consumption[(i, j, k)] = 1.1 * self.beta * self.center.get_distance_from_village(i,j) * (self.village.get_demand(j) + 20) * sol._alloc[(i, j, k)]
         return sol

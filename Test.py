@@ -11,6 +11,7 @@ from DeterministicG import DeterministicG
 from Stochastic import Stochastic
 from StochasticG import StochasticG
 from Robust import Robust
+from RobustG import RobustG
 import random
 from tqdm import tqdm
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     print(centres.get_distance_from_village(1,1))'''
 
     # Create and solve the problem with the deterministic method
-    detsolver = DeterministicG(centres, villages)
+    detsolver = RobustG(centres, villages, 1200)
     detsolver.create_model()
     detsolver.solve_milp()
 
@@ -98,6 +99,17 @@ if __name__ == "__main__":
 
     # Print the solution
     detsol.print()
+
+    '''# Create and solve the problem with the deterministic method
+    detsolver = DeterministicG(centres, villages)
+    detsolver.create_model()
+    detsolver.solve_milp()
+
+    # Get the solution
+    detsol = detsolver.get_solution()
+
+    # Print the solution
+    detsol.print()'''
 
 
 
