@@ -8,7 +8,7 @@ from JSInstance import JSInstance
 from Solution import Solution
 
 # Class for solving deterministic job-shop scheduling problems using MILP
-class Deterministic(object):
+class DeterministicG(object):
     def __init__(self, centers, villages):
         # Initialize MILP model and instance
         self._model = pulp.LpProblem("Drone attribution", pulp.LpMaximize)
@@ -36,7 +36,7 @@ class Deterministic(object):
         # Binary variables x_ijk to define if center i serve j village with k drone
         self._x = pulp.LpVariable.dicts('Drone allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpBinary)
+                                        lowBound=0,cat=pulp.LpContinuous)
         # Binary variables y_i to define if i center is open
         self._y = pulp.LpVariable.dicts('Center opening',
                                   self.center.get_all_ids(),
@@ -53,7 +53,7 @@ class Deterministic(object):
         Create the objective function of the model.
         """
         # Objective is to maximize village demande
-        self._model += pulp.lpSum(self._x[i, j, k] * self.village.get_demand(j) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone)
+        self._model += pulp.lpSum(self._x[i, j, k] for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone)
 
 
     # Method for creating the constraints
@@ -63,18 +63,18 @@ class Deterministic(object):
         """
         # 700Wh max / drone
         for k in self.drone:
-            self._model += 2 * 1.1 * pulp.lpSum((self.beta * self.center.get_distance_from_village(i,j)) * 
-                                                (self.village.get_demand(j) + 10) *
-                                                 self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
+            self._model +=  1.1 * pulp.lpSum((self.beta * self.center.get_distance_from_village(i,j)) * 
+                                                (self._x[i,j,k] + 20) 
+                                                  for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
 
 
         # 1 drone per village
         for j in self.village.get_all_ids():
-            self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= 1
+            self._model += pulp.lpSum(self._x[i,j,k] for i in self.center.get_all_ids() for k in self.drone) <= self.village.get_demand(j)
 
         # 30kg max / center
         for i in self.center.get_all_ids():
-            self._model += pulp.lpSum(self._x[i,j,k] * self.village.get_demand(j) for j in self.village.get_all_ids() for k in self.drone) <= 30
+            self._model += pulp.lpSum(self._x[i,j,k] for j in self.village.get_all_ids() for k in self.drone) <= 30
 
 
         # 1 road center - villlage by drone
@@ -97,7 +97,7 @@ class Deterministic(object):
         for i in self.center.get_all_ids():
             for j in self.village.get_all_ids():
                 for k in self.drone:
-                    self._model += self._z[i,k] >= self._x[i,j,k]
+                    self._model += self._x[i,j,k] <= self.village.get_demand(j)*self._z[i,k]
 
         # If center not opened, no drone assigned
         for i in self.center.get_all_ids():
@@ -122,7 +122,7 @@ class Deterministic(object):
         Solve the model using the chosen solver.
         """
         # Solve using the default solver used by PuLP
-        self._model.solve()
+        #self._model.solve()
 
         #Solving using GUROBI or CPLEX (choose one of the two depending on which one is available)
         #Use the command pulp.pulpTestAll() to check which solvers are available on your machine
@@ -130,14 +130,15 @@ class Deterministic(object):
         #self._model.solve(pulp.GUROBI_CMD(options=[("MIPgap", 0.03)]))
         #self._model.solve(pulp.GUROBI(msg=1, gapRel=0.001))
 
-        #self._model.solve(pulp.CPLEX_CMD())
-        #self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.005))
+        self._model.solve(pulp.CPLEX_CMD())
+        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.005))
 
 
     def get_solution(self):
         """
         Create a solution object from the decision variables computed.
         """
+        print(pulp.value(self._model.objective))
         sol = Solution(self.center, self.village)
         if self._model.status > 0:
             sol._max_demand = pulp.value(self._model.objective)

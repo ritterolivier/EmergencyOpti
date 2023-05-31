@@ -9,7 +9,7 @@ from Solution import Solution
 
 # Class for solving deterministic job-shop scheduling problems using MILP
 class Robust(object):
-    def __init__(self, centers, villages):
+    def __init__(self, centers, villages, gamma):
         # Initialize MILP model and instance
         self._model = pulp.LpProblem("Drone attribution", pulp.LpMaximize)
         # Get list of centers
@@ -20,6 +20,8 @@ class Robust(object):
         self.drone = np.arange(1,16)
         # Cunsomption constat
         self.beta = 2.3
+        self.betaVar = 0.7
+        self.gamma = gamma
 
     # Method for creating the model
     def create_model(self):
@@ -36,21 +38,21 @@ class Robust(object):
         # Binary variables x_ijk to define if center i serve j village with k drone
         self._x = pulp.LpVariable.dicts('Drone allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        cat=pulp.LpBinary)
+                                        lowBound=0,cat=pulp.LpBinary)
         # Binary variables y_i to define if i center is open
         self._y = pulp.LpVariable.dicts('Center opening',
                                   self.center.get_all_ids(),
-                                  cat=pulp.LpBinary)
+                                  lowBound=0,cat=pulp.LpBinary)
         
         self._z = pulp.LpVariable.dicts('Center - Drone Allocation',
                                    ((i, k) for i in self.center.get_all_ids() for k in self.drone),
-                                        cat=pulp.LpBinary)
+                                       lowBound=0, cat=pulp.LpBinary)
         
-        self._q = pulp.LpVariable("q", lowBound=0, cat=pulp.LpInteger)
+        self._q = pulp.LpVariable("q", lowBound=0, cat=pulp.LpContinuous)
 
         self._r = pulp.LpVariable.dicts('Center - Village',
                                    ((i, j) for i in self.center.get_all_ids() for j in self.village.get_all_ids() ),
-                                        cat=pulp.LpInteger)
+                                        lowBound=0,cat=pulp.LpContinuous)
         
 
     # Method for creating the objective function
@@ -69,10 +71,19 @@ class Robust(object):
         """
         # 700Wh max / drone
         for k in self.drone:
-            self._model += 2 * 1.1 * pulp.lpSum((self.beta * self.center.get_distance_from_village(i,j)) * 
+            self._model += (2 * 1.1 * pulp.lpSum((self.beta * self.center.get_distance_from_village(i,j)) * 
                                                 (self.village.get_demand(j) + 10) *
-                                                 self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) <= 700
+                                                 self._x[i,j,k] for i in self.center.get_all_ids() for j in self.village.get_all_ids()) + 
+                                                 (self.gamma * self._q) + 
+                                                 pulp.lpSum(self._r[i,j] for i in self.center.get_all_ids() for j in self.village.get_all_ids())) <= 700
 
+
+        for i in self.center.get_all_ids():
+            for j in self.village.get_all_ids():
+                for k in self.drone:
+                    self._q + self._r[i,j] >= (2 * 1.1 * self.betaVar * (self.village.get_demand(j) + 10) * 
+                                               self.center.get_distance_from_village(i,j) * 
+                                               self._x[i,j,k])
 
         # 1 drone per village
         for j in self.village.get_all_ids():
@@ -155,4 +166,6 @@ class Robust(object):
                 if sol._alloc[(i, j, k)]:
                     sol._supplied[j] = True
                     sol._drone_consumption[(i, j, k)] = 2 * 1.1 * self.beta * self.center.get_distance_from_village(i,j) * (self.village.get_demand(j) + 10) * sol._alloc[(i, j, k)]
+            print(pulp.value(self._q))
+            print(self._r)
         return sol

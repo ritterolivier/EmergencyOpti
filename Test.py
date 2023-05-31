@@ -1,10 +1,13 @@
 import pulp
+import cplex
+import gurobipy
 import numpy as np
 import pandas as pd
 from Matrix import Matrix
 from Villages import Villages
 from Centres import Centres
 from Deterministic import Deterministic
+from DeterministicG import DeterministicG
 from Stochastic import Stochastic
 from StochasticG import StochasticG
 from Robust import Robust
@@ -86,7 +89,7 @@ if __name__ == "__main__":
     print(centres.get_distance_from_village(1,1))'''
 
     # Create and solve the problem with the deterministic method
-    detsolver = Deterministic(centres, villages)
+    detsolver = DeterministicG(centres, villages)
     detsolver.create_model()
     detsolver.solve_milp()
 
@@ -98,7 +101,7 @@ if __name__ == "__main__":
 
 
 
-    # Create and solve the problem with the stochastic method
+    """# Create and solve the problem with the stochastic method
     detsolver = StochasticG(centres, villages)
     detsolver.create_model()
     detsolver.solve_milp()
@@ -107,7 +110,7 @@ if __name__ == "__main__":
     detsol = detsolver.get_solution()
 
     # Print the solution
-    detsol.print()
+    detsol.print()"""
 
 '''
 

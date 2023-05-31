@@ -1,0 +1,88 @@
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/0c6977ff33fc40c7a2c4ca05443ee5c1-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:10:34 2023
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/0c6977ff33fc40c7a2c4ca05443ee5c1-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:10:34 2023
+
+Tried aggregator 1 time.
+LP Presolve eliminated 54571 rows and 54240 columns.
+All rows and columns eliminated.
+Presolve time = 0.02 sec. (31.67 ticks)
+Parallel mode: deterministic, using up to 6 threads for concurrent optimization:
+ * Starting dual Simplex on 1 thread...
+ * Starting primal Simplex on 1 thread...
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/0c6977ff33fc40c7a2c4ca05443ee5c1-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:10:34 2023
+
+Using devex.
+
+Total time on 6 threads = 0.05 sec. (262.44 ticks)
+
+Dual simplex solved model.
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/d7644e9b9a46493cb1d11a70881716f3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:20:10 2023
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/d7644e9b9a46493cb1d11a70881716f3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:20:31 2023
+
+Tried aggregator 1 time.
+LP Presolve eliminated 362441 rows and 360240 columns.
+All rows and columns eliminated.
+Presolve time = 0.13 sec. (211.46 ticks)
+Parallel mode: deterministic, using up to 6 threads for concurrent optimization:
+ * Starting dual Simplex on 1 thread...
+ * Starting primal Simplex on 1 thread...
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/d7644e9b9a46493cb1d11a70881716f3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:20:31 2023
+
+Using devex.
+
+Total time on 6 threads = 0.32 sec. (668.16 ticks)
+
+Dual simplex solved model.
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/8a22dd3b07fa4f74a1184770c8c7d42b-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:51:27 2023
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/8a22dd3b07fa4f74a1184770c8c7d42b-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:59:28 2023
+
+Tried aggregator 1 time.
+LP Presolve eliminated 1811241 rows and 1800240 columns.
+All rows and columns eliminated.
+Presolve time = 1.64 sec. (1060.50 ticks)
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/8a22dd3b07fa4f74a1184770c8c7d42b-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 13:59:30 2023
+
+Using devex.
+Parallel mode: deterministic, using up to 6 threads for concurrent optimization:
+ * Starting dual Simplex on 1 thread...
+ * Starting primal Simplex on 1 thread...
+
+Total time on 6 threads = 3.40 sec. (2580.40 ticks)
+
+Dual simplex solved model.
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/16d11d9aa41849c6b7bf2cc34db123a3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 14:04:58 2023
+
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/16d11d9aa41849c6b7bf2cc34db123a3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 14:05:18 2023
+
+Tried aggregator 1 time.
+LP Presolve eliminated 362441 rows and 360240 columns.
+All rows and columns eliminated.
+Presolve time = 0.13 sec. (211.46 ticks)
+Parallel mode: deterministic, using up to 6 threads for concurrent optimization:
+ * Starting dual Simplex on 1 thread...
+ * Starting primal Simplex on 1 thread...
+
+Log for '/var/folders/9g/2ksh9gd11v39rwhxj0gl_49c0000gn/T/16d11d9aa41849c6b7bf2cc34db123a3-pulp.lp' Clone_1 (V22.1.1.0) Sat May 27 14:05:18 2023
+
+Using devex.
+
+Total time on 6 threads = 0.31 sec. (668.16 ticks)
+
+Dual simplex solved model.
+
