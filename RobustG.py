@@ -39,7 +39,7 @@ class RobustG(object):
         # weight x_ijk to define if center i serve j village with k drone
         self._x = pulp.LpVariable.dicts('Weight allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpInteger)
+                                        lowBound=0,cat=pulp.LpContinuous)
         
         # Binary variables x_ijk to define if center i serve j village with k drone
         self._t = pulp.LpVariable.dicts('Drone allocation', 
@@ -55,11 +55,11 @@ class RobustG(object):
                                    ((i, k) for i in self.center.get_all_ids() for k in self.drone),
                                         cat=pulp.LpBinary)
         
-        self._q = pulp.LpVariable.dicts("q", ((k) for k in self.drone), lowBound=0, cat=pulp.LpInteger)
+        self._q = pulp.LpVariable.dicts("q", ((k) for k in self.drone), lowBound=0, cat=pulp.LpContinuous)
 
         self._r = pulp.LpVariable.dicts('Center - Village - Drones',
                                    ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpInteger)
+                                        lowBound=0,cat=pulp.LpContinuous)
         
 
     # Method for creating the objective function
@@ -125,7 +125,7 @@ class RobustG(object):
         for i in self.center.get_all_ids():
             for j in self.village.get_all_ids():
                 for k in self.drone:
-                    self._q[k] + self._r[i,j,k] >= (1.1 * self._bChap * (
+                    self._model += self._q[k] + self._r[i,j,k] >= (1.1 * self._bChap * (
                         self._x[i,j,k] + 20 * self._t[i,j,k]) 
                         * self.center.get_distance_from_village(i,j))
 
@@ -154,22 +154,30 @@ class RobustG(object):
         #self._model.solve(pulp.GUROBI(msg=1, gapRel=0.001))
 
         #self._model.solve(pulp.CPLEX_CMD())
-        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.04))
+        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.02))
 
     def get_solution(self):
         """
         Create a solution object from the decision variables computed.
         """
         print(pulp.value(self._model.objective))
+
+        print("Values of _x variables:")
+        for var in self._x.values():
+            if(pulp.value(var)>0):
+                print(f"{var}: {pulp.value(var)}")
+        
+        
+        print("Values of _r variables:")
+        for var in self._r.values():
+            if(pulp.value(var)>0):
+                print(f"{var}: {pulp.value(var)}")
+
+        print("Values of _q variables:")
+        for var in self._q.values():
+            if(pulp.value(var)>0):
+                print(f"{var}: {pulp.value(var)}")
+
         sol = Solution(self.center, self.village)
-        if self._model.status > 0:
-            sol._max_demand = pulp.value(self._model.objective)
-            sol._alloc = {key: var.varValue for key, var in self._x.items() if var.varValue > 0}
-            sol._open = {key: var.varValue for key, var in self._y.items() if var.varValue > 0}
-            sol._drone_center = {key: var.varValue for key, var in self._z.items() if var.varValue > 0}
-            sol._supplied = {key: False for key in self.village.get_all_ids()}
-            '''for i, j, k in sol._alloc:
-                if sol._alloc[(i, j, k)]:
-                    sol._supplied[j] = True
-                    sol._drone_consumption[(i, j, k)] = 1.1 * self.beta * self.center.get_distance_from_village(i,j) * (self.village.get_demand(j) + 20) * sol._alloc[(i, j, k)]'''
-        return sol
+
+        return 0

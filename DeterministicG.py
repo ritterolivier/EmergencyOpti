@@ -36,7 +36,7 @@ class DeterministicG(object):
         # weight x_ijk to define if center i serve j village with k drone
         self._x = pulp.LpVariable.dicts('Weight allocation', 
                                         ((i, j, k) for i in self.center.get_all_ids() for j in self.village.get_all_ids() for k in self.drone),
-                                        lowBound=0,cat=pulp.LpInteger)
+                                        lowBound=0,cat=pulp.LpContinuous)
         
         # Binary variables x_ijk to define if center i serve j village with k drone
         self._t = pulp.LpVariable.dicts('Drone allocation', 
@@ -134,7 +134,7 @@ class DeterministicG(object):
         #self._model.solve(pulp.GUROBI(msg=1, gapRel=0.001))
 
         #self._model.solve(pulp.CPLEX_CMD())
-        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.04))
+        self._model.solve(pulp.CPLEX_PY(msg=0, gapRel=0.02))
 
     def get_solution(self):
         """
