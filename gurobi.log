@@ -1,5 +1,0 @@
-
-Gurobi 10.0.1 (mac64[rosetta2], gurobi_cl) logging started Sat May 27 12:33:37 2023
-
-Set parameter MIPGap to value 0.03
-Set parameter LogFile to value "gurobi.log"
