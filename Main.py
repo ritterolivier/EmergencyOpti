@@ -22,7 +22,7 @@ if __name__ == "__main__":
     centres.create_village_distance_dict(villages)
     villages.create_center_distance_dict(centres)
 
-    '''# Create and solve the problem with the deterministic method
+    # Create and solve the problem with the deterministic method
     for beta in (2.3, 2.75, 3):
         detSolver = Deterministic(centres, villages, beta)
         detSolver.create_model()
@@ -39,12 +39,9 @@ if __name__ == "__main__":
         charts = Charts(detSol, centres, villages, time_taken)
         charts.plot_solution()
         charts.plot_dronesCenters()
-
-        print('DET : ',beta)'''
         
-
     # Create and solve the problem with the robust method
-    for gamma in (0.1, 0):
+    for gamma in (0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1):
         robSolver = Robust(centres, villages, gamma)
         robSolver.create_model()
 
@@ -60,9 +57,6 @@ if __name__ == "__main__":
         charts = Charts(robSol, centres, villages,time_taken)
         charts.plot_solution()
         charts.plot_dronesCenters()
-
-        print('ROB : ',gamma)
-'''
 
     # Create and solve the problem with the stochastic method
     stochSolver = Stochastic(centres, villages, 16)
@@ -81,5 +75,3 @@ if __name__ == "__main__":
     charts.plot_solution()
     charts.plot_dronesCenters()
 
-    print('STOCH')
-'''
